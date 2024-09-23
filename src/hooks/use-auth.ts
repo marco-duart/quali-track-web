@@ -8,7 +8,9 @@ const useAuth = (allowedRoles: string[]) => {
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session || !allowedRoles.includes(session?.user?.role)) {
+
+    const userRole = session?.user?.role;
+    if (!session || !userRole || !allowedRoles.includes(userRole)) {
       router.push('/auth/login');
     }
   }, [session, status, allowedRoles, router]);
