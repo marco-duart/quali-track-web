@@ -1,16 +1,53 @@
 import { Box, Flex, Icon, Link, Text, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { FiHome, FiUsers, FiBarChart2, FiSettings } from 'react-icons/fi';
+import useAuth from '../../../hooks/use-auth';
 
 const Sidebar = () => {
   const router = useRouter();
+  
+  const { session } = useAuth(['admin', 'monitor', 'manager', 'employee']);
 
-  const menuItems = [
-    { name: 'Dashboard', icon: FiHome, path: '/dashboard/admin' },
-    { name: 'Usuários', icon: FiUsers, path: '/dashboard/users' },
-    { name: 'Relatórios', icon: FiBarChart2, path: '/dashboard/reports' },
-    { name: 'Configurações', icon: FiSettings, path: '/dashboard/settings' },
-  ];
+  const getMenuItems = () => {
+    if (!session?.user?.role) return [];
+
+    const adminMenu = [
+      { name: 'Dashboard', icon: FiHome, path: '/dashboard/admin' },
+      { name: 'Usuários', icon: FiUsers, path: '/dashboard/users' },
+      { name: 'Relatórios', icon: FiBarChart2, path: '/dashboard/reports' },
+      { name: 'Configurações', icon: FiSettings, path: '/dashboard/settings' },
+    ];
+
+    const monitorMenu = [
+      { name: 'Dashboard', icon: FiHome, path: '/dashboard/monitor' },
+      { name: 'Relatórios', icon: FiBarChart2, path: '/dashboard/reports' },
+      { name: 'Equipes', icon: FiUsers, path: '/dashboard/teams' },
+    ];
+
+    const managerMenu = [
+      { name: 'Dashboard', icon: FiHome, path: '/dashboard/manager' },
+      { name: 'Relatórios', icon: FiBarChart2, path: '/dashboard/reports' },
+    ];
+
+    const employeeMenu = [
+      { name: 'Minhas Avaliações', icon: FiHome, path: '/dashboard/employee' },
+    ];
+
+    switch (session.user.role) {
+      case 'admin':
+        return adminMenu;
+      case 'monitor':
+        return monitorMenu;
+      case 'manager':
+        return managerMenu;
+      case 'employee':
+        return employeeMenu;
+      default:
+        return [];
+    }
+  };
+
+  const menuItems = getMenuItems();
 
   return (
     <Box
