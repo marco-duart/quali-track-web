@@ -12,16 +12,24 @@ export default NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-            email: credentials?.email,
-            password: credentials?.password,
-          }, { withCredentials: true });
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/users/sign_in`,
+            {
+              user: {
+                email: credentials?.email,
+                password: credentials?.password,
+              },
+            },
+            { withCredentials: true }
+          );
 
           if (response.data) {
-            return response.data;
+            return response.data.user;
           }
+
           return null;
         } catch (error) {
+          console.error('Login error:', error);
           return null;
         }
       },
@@ -30,19 +38,18 @@ export default NextAuth({
   pages: {
     signIn: '/auth/login',
   },
-  session: {
-    strategy: 'jwt',
-  },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.role = user.role;
-      return token;
-    },
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role as string;
       }
       return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
     },
   },
 });
